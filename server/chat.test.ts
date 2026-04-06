@@ -1,13 +1,14 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi, beforeEach } from "vitest";
 import { appRouter } from "./routers";
 import type { TrpcContext } from "./_core/context";
 
-// Mock the LLM module
-vi.mock("./_core/llm", () => ({
-  invokeLLM: vi.fn().mockResolvedValue({
-    id: "test-id",
+// Mock the OpenAI module
+vi.mock("openai", () => {
+  const mockCreate = vi.fn().mockResolvedValue({
+    id: "chatcmpl-test",
+    object: "chat.completion",
     created: Date.now(),
-    model: "gemini-2.5-flash",
+    model: "gpt-4.1-mini",
     choices: [
       {
         index: 0,
@@ -23,8 +24,18 @@ vi.mock("./_core/llm", () => ({
       completion_tokens: 20,
       total_tokens: 120,
     },
-  }),
-}));
+  });
+
+  return {
+    default: vi.fn().mockImplementation(() => ({
+      chat: {
+        completions: {
+          create: mockCreate,
+        },
+      },
+    })),
+  };
+});
 
 function createPublicContext(): TrpcContext {
   return {
@@ -40,6 +51,10 @@ function createPublicContext(): TrpcContext {
 }
 
 describe("chat.send", () => {
+  beforeEach(() => {
+    process.env.OPENAI_API_KEY = "sk-test-key";
+  });
+
   it("returns an assistant response using companySlug", async () => {
     const ctx = createPublicContext();
     const caller = appRouter.createCaller(ctx);

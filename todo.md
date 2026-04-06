@@ -14,3 +14,6 @@
 - [x] Vitest tests for chat procedure
 - [x] Server-side system prompt construction (accept companySlug, build prompt server-side)
 - [x] Mobile UX hardening for chat widget and demo page
+- [ ] Switch chat router to use OpenAI SDK directly (gpt-4.1-mini)
+- [ ] Set OPENAI_API_KEY on Vercel via API
+- [ ] Redeploy to Vercel and verify live chat works
